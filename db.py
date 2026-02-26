@@ -12,13 +12,14 @@ If neither is available, functions raise RuntimeError with a clear message.
 
 import os
 from datetime import datetime, timedelta
+import streamlit as st
 
 
+@st.cache_resource
 def _client():
-    """Return a Supabase client. Tries st.secrets first, then env vars."""
+    """Return a cached Supabase client (shared across reruns)."""
     url = key = None
     try:
-        import streamlit as st
         url = st.secrets.get("SUPABASE_URL")
         key = st.secrets.get("SUPABASE_KEY")
     except Exception:
@@ -35,6 +36,19 @@ def _client():
         )
     from supabase import create_client
     return create_client(url, key)
+
+
+def _bust_employee_cache():
+    """Call after any employee write to invalidate read caches."""
+    list_employees.clear()
+    list_all_employees.clear()
+    get_employee.clear()
+
+
+def _bust_remittance_cache():
+    """Call after any remittance write to invalidate read caches."""
+    available_months.clear()
+    get_remittances.clear()
 
 
 # ── Employee name → UUID cache (in-process, per session) ─────────────
@@ -66,6 +80,7 @@ def _parse_display_date(date_str):
 #  EMPLOYEES
 # ════════════════════════════════════════════════════════════
 
+@st.cache_data(ttl=300)
 def list_employees() -> list[str]:
     """Return sorted list of all active employee names."""
     result = (_client().table("employees")
@@ -75,12 +90,14 @@ def list_employees() -> list[str]:
     return sorted(r["employee_name"] for r in result.data)
 
 
+@st.cache_data(ttl=300)
 def list_all_employees() -> list[str]:
     """Return sorted list of all employees including archived."""
     result = _client().table("employees").select("employee_name").execute()
     return sorted(r["employee_name"] for r in result.data)
 
 
+@st.cache_data(ttl=300)
 def get_employee(name: str) -> dict | None:
     """Get full employee record by name, including nested data. Returns None if not found."""
     result = (_client().table("employees")
@@ -188,6 +205,7 @@ def save_employee(data: dict) -> str:
                  on_conflict="employee_id,year_key")
          .execute())
 
+    _bust_employee_cache()
     return emp_id
 
 
@@ -249,9 +267,11 @@ def log_remittance(entry: dict) -> dict | None:
         "pdf_storage_path":      entry.get("pdf_path"),
     }
     result = _client().table("remittances").insert(row).execute()
+    _bust_remittance_cache()
     return _normalize_remittance(result.data[0]) if result.data else None
 
 
+@st.cache_data(ttl=300)
 def get_remittances(year: int, month: int) -> list:
     """Return all active remittance entries for a specific month."""
     result = (_client().table("remittances")
@@ -303,8 +323,10 @@ def soft_delete_remittance(remittance_id: str):
      .update({"deleted_at": datetime.now().isoformat()})
      .eq("id", remittance_id)
      .execute())
+    _bust_remittance_cache()
 
 
+@st.cache_data(ttl=300)
 def available_months() -> tuple[list, list]:
     """Return ([(year, month), ...], []) of months with remittance data."""
     result = (_client().table("remittances")
