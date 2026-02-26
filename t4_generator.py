@@ -65,14 +65,15 @@ def aggregate_t4_data(employee, tax_year):
             if e.get("employee") != employee:
                 continue
             entry_count += 1
-            total_gross          += e["gross"]
-            total_cpp            += e["cpp_employee"]
-            total_cpp2           += e.get("cpp2_employee", 0)
-            total_ei             += e["ei_employee"]
-            total_fed_tax        += e["fed_tax"]
-            total_prov_tax       += e["prov_tax"]
-            total_ei_insurable   += e.get("ei_insurable_gross", e["gross"])
-            total_cpp_pensionable += e.get("cpp_pensionable_gross", e["gross"])
+            _gross = e.get("gross") or 0
+            total_gross          += _gross
+            total_cpp            += e.get("cpp_employee") or 0
+            total_cpp2           += e.get("cpp2_employee") or 0
+            total_ei             += e.get("ei_employee") or 0
+            total_fed_tax        += e.get("fed_tax") or 0
+            total_prov_tax       += e.get("prov_tax") or 0
+            total_ei_insurable   += e.get("ei_insurable_gross") or _gross
+            total_cpp_pensionable += e.get("cpp_pensionable_gross") or _gross
 
     if entry_count == 0:
         return None
@@ -270,16 +271,16 @@ def aggregate_t4sum_data(tax_year):
         for e in _db.get_remittances(year, month):
             entry_count += 1
             employees_seen.add(e.get("employee", ""))
-            total_gross    += e["gross"]
-            total_cpp_ee   += e["cpp_employee"]
-            total_cpp2_ee  += e.get("cpp2_employee", 0)
-            total_cpp_er   += e["cpp_employer"]
-            total_cpp2_er  += e.get("cpp2_employer", 0)
-            total_ei_ee    += e["ei_employee"]
-            total_ei_er    += e["ei_employer"]
-            total_fed_tax  += e["fed_tax"]
-            total_prov_tax += e["prov_tax"]
-            total_remitted += e["total_remittance"]
+            total_gross    += e.get("gross") or 0
+            total_cpp_ee   += e.get("cpp_employee") or 0
+            total_cpp2_ee  += e.get("cpp2_employee") or 0
+            total_cpp_er   += e.get("cpp_employer") or 0
+            total_cpp2_er  += e.get("cpp2_employer") or 0
+            total_ei_ee    += e.get("ei_employee") or 0
+            total_ei_er    += e.get("ei_employer") or 0
+            total_fed_tax  += e.get("fed_tax") or 0
+            total_prov_tax += e.get("prov_tax") or 0
+            total_remitted += e.get("total_remittance") or 0
 
     if entry_count == 0:
         return None

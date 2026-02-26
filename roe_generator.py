@@ -151,7 +151,7 @@ def calculate_insurable_hours(entries, wage_history):
             hours = e["hours"]
             source = "recorded"
         elif rate > 0:
-            hours = round(e["gross"] / rate * 2) / 2  # round to 0.5
+            hours = round((e.get("gross") or 0) / rate * 2) / 2  # round to 0.5
             source = "estimated"
         else:
             hours = 0.0

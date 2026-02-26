@@ -89,7 +89,7 @@ def _gross_from_remittances(employee, period_from, period_to):
             if yr and mo:
                 pay_date = date(int(yr), int(mo), 15)
         if pay_date and period_from <= pay_date <= period_to:
-            total += e["gross"] or 0
+            total += e.get("gross") or 0
             count += 1
     return round(total, 2), count
 

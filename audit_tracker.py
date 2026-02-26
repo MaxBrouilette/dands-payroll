@@ -21,15 +21,15 @@ import db
 
 def _build_audit_from_remittance(entry, pay_year, pay_month):
     """Convert a remittance entry into an audit entry with T4127 comparison."""
-    gross   = entry["gross"]
+    gross   = entry.get("gross") or 0
     formula = estimate_deductions(gross, pay_periods=24, tax_year=pay_year, pay_month=pay_month)
 
     actual = {
-        "cpp":      round(entry["cpp_employee"] or 0, 2),
+        "cpp":      round(entry.get("cpp_employee") or 0, 2),
         "cpp2":     round(entry.get("cpp2_employee") or 0, 2),
-        "ei":       round(entry["ei_employee"] or 0, 2),
-        "fed_tax":  round(entry["fed_tax"] or 0, 2),
-        "prov_tax": round(entry["prov_tax"] or 0, 2),
+        "ei":       round(entry.get("ei_employee") or 0, 2),
+        "fed_tax":  round(entry.get("fed_tax") or 0, 2),
+        "prov_tax": round(entry.get("prov_tax") or 0, 2),
     }
 
     variance = {k: round(actual[k] - formula[k], 2) for k in actual}
@@ -169,7 +169,7 @@ def get_audit_summary(entries):
     employees = set()
 
     for e in entries:
-        total_gross += e["gross"]
+        total_gross += e.get("gross") or 0
         employees.add(e["employee"])
         for k in keys:
             actual_totals[k]   = round(actual_totals[k]   + e["actual"].get(k, 0),   2)
