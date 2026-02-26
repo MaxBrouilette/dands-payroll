@@ -1,0 +1,20 @@
+# Credentials — never commit these
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Local data (migrated to Supabase)
+employees/
+remittances/
+audit/
+resolutions/
+trash/
+employer_config.json
+
+# Supabase local dev
+supabase/.temp/
+supabase/config.toml
