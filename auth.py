@@ -18,12 +18,14 @@ import streamlit as st
 
 def _supabase_configured() -> bool:
     """Return True if Supabase credentials are available."""
+    url = None
     try:
-        url = st.secrets.get("SUPABASE_URL", "")
-        return bool(url and not url.startswith("https://your-project"))
+        url = st.secrets.get("SUPABASE_URL")
     except Exception:
+        pass
+    if not url:
         url = os.environ.get("SUPABASE_URL", "")
-        return bool(url)
+    return bool(url and not url.startswith("https://your-project"))
 
 
 def _auth_client():
