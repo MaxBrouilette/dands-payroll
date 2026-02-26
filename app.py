@@ -586,7 +586,7 @@ if "save_msg" not in st.session_state:
 # ── Sidebar ──────────────────────────────────────────────────
 
 _co = load_employer()
-st.sidebar.title(f"{_co['short_name']} Payroll")
+st.sidebar.title(f"{_co.get('short_name', 'D&S')} Payroll")
 st.sidebar.markdown("---")
 
 existing = get_existing_employees()
