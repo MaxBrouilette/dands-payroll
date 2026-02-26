@@ -64,7 +64,7 @@ def _employee_id(name: str) -> str | None:
               .eq("employee_name", name)
               .maybe_single()
               .execute())
-    if result.data:
+    if result and result.data:
         _emp_id_cache[name] = result.data["id"]
         return result.data["id"]
     return None
@@ -105,7 +105,7 @@ def get_employee(name: str) -> dict | None:
               .eq("employee_name", name)
               .maybe_single()
               .execute())
-    if not result.data:
+    if not (result and result.data):
         return None
     emp = dict(result.data)
 
@@ -306,7 +306,7 @@ def find_remittance(employee: str, payment_date_str: str, year: int, month: int)
               .is_("deleted_at", "null")
               .maybe_single()
               .execute())
-    return _normalize_remittance(result.data) if result.data else None
+    return _normalize_remittance(result.data) if (result and result.data) else None
 
 
 def update_remittance_pdf_path(remittance_id: str, path: str):
@@ -356,7 +356,7 @@ def get_remittance_status(year: int, month: int) -> dict:
               .eq("pay_month", month)
               .maybe_single()
               .execute())
-    if result.data:
+    if result and result.data:
         return {
             "remitted":       result.data.get("remitted", False),
             "remitted_date":  result.data.get("remitted_date", "") or "",
@@ -635,7 +635,7 @@ def get_resolution_for_period(employee: str, payment_date_str: str) -> dict | No
               .is_("deleted_at", "null")
               .maybe_single()
               .execute())
-    return _normalize_resolution(result.data) if result.data else None
+    return _normalize_resolution(result.data) if (result and result.data) else None
 
 
 def get_all_resolution_years() -> list[int]:
@@ -787,7 +787,7 @@ def restore_from_trash(trash_id: str) -> tuple[dict | None, dict | None]:
               .eq("id", trash_id)
               .maybe_single()
               .execute())
-    if not result.data:
+    if not (result and result.data):
         return None, None
     row = result.data
     _client().table("trash").delete().eq("id", trash_id).execute()
@@ -826,7 +826,7 @@ def load_employer() -> dict:
               .eq("id", 1)
               .maybe_single()
               .execute())
-    return result.data["config"] if result.data else {}
+    return result.data["config"] if (result and result.data) else {}
 
 
 def save_employer(data: dict):

@@ -661,10 +661,10 @@ if selected != st.session_state.loaded_employee:
         _pt = p.get("part_time") or {}
         _freq_rev = {24: "Semi-Monthly (24/yr)", 26: "Bi-Weekly (26/yr)",
                      52: "Weekly (52/yr)"}
-        st.session_state["f_pt_days_pw"]  = int(_pt.get("days_per_week", 3))
-        st.session_state["f_pt_hours_pd"] = float(_pt.get("hours_per_day", 6.0))
+        st.session_state["f_pt_days_pw"]  = int(_pt.get("days_per_week") or 3)
+        st.session_state["f_pt_hours_pd"] = float(_pt.get("hours_per_day") or 6.0)
         st.session_state["f_pt_pay_freq"] = _freq_rev.get(
-            int(_pt.get("pay_periods", 24)), "Semi-Monthly (24/yr)")
+            int(_pt.get("pay_periods") or 24), "Semi-Monthly (24/yr)")
     else:
         st.session_state["f_emp_name"]   = ""
         st.session_state["f_emp_id"]     = "N/A"
@@ -810,14 +810,15 @@ with st.sidebar.expander("Employer Profile"):
                               key="_co_legal")
     _co_oa = st.text_input("Operating As", value=_co.get("operating_as", ""),
                            key="_co_oa")
+    _co_addr_lines = _co.get("address_lines") or []
     _co_addr1 = st.text_input("Address Line 1",
-                              value=_co.get("address_lines", [""])[0] if _co.get("address_lines") else "",
+                              value=_co_addr_lines[0] if len(_co_addr_lines) > 0 else "",
                               key="_co_addr1")
     _co_addr2 = st.text_input("City, Province",
-                              value=_co.get("address_lines", [])[1] if len(_co.get("address_lines", [])) > 1 else "",
+                              value=_co_addr_lines[1] if len(_co_addr_lines) > 1 else "",
                               key="_co_addr2")
     _co_addr3 = st.text_input("Postal Code",
-                              value=_co.get("address_lines", [])[2] if len(_co.get("address_lines", [])) > 2 else "",
+                              value=_co_addr_lines[2] if len(_co_addr_lines) > 2 else "",
                               key="_co_addr3")
     _co_bn = st.text_input("CRA Business Number",
                            value=_co.get("cra_bn", ""), key="_co_bn")
@@ -843,7 +844,7 @@ with st.sidebar.expander("Employer Profile"):
         help="How long deleted items remain recoverable before permanent removal.")
     # ── Document Theme ──
     st.markdown("---")
-    _themes = _co.get("themes", {})
+    _themes = _co.get("themes") or {}
     _theme_keys = list(_themes.keys())
     _theme_labels = {k: _themes[k].get("label", k) for k in _theme_keys}
     _cur_active = _co.get("active_theme", "theme_1")
@@ -956,7 +957,7 @@ with tab_payroll:
                     _on_checks.append((
                         "Address on file",
                         bool("".join(_ob_prof.get(
-                            "employee_address", [])).strip())))
+                            "employee_address") or []).strip())))
                     _on_checks.append((
                         "Emergency contact",
                         bool(_ob_prof.get(
@@ -1248,7 +1249,7 @@ with tab_payroll:
             _wh = (load_profile(selected).get("wage_history", [])
                    if selected != "+ New Employee" else [])
             if _wh:
-                _cur_rate = _wh[-1]["rate"]
+                _cur_rate = (_wh[-1] or {}).get("rate", 0.0)
                 st.markdown(f"**Current Rate:** ${_cur_rate:.2f}/hr")
                 wh_rows = []
                 for _wh_entry in reversed(_wh):
@@ -1265,9 +1266,9 @@ with tab_payroll:
 
                 # ── Wage Change Letter ──
                 if len(_wh) >= 2:
-                    _prev_rate = _wh[-2]["rate"]
-                    _prev_eff = _wh[-2].get("effective_date", "")
-                    _cur_eff = _wh[-1].get("effective_date", "")
+                    _prev_rate = (_wh[-2] or {}).get("rate", 0.0)
+                    _prev_eff = (_wh[-2] or {}).get("effective_date", "")
+                    _cur_eff = (_wh[-1] or {}).get("effective_date", "")
                     if st.button("Generate Wage Change Letter",
                                  key="btn_wage_letter"):
                         try:
@@ -4311,7 +4312,7 @@ with tab_roe:
 
         _sin_val = _roe_profile.get("sin", "")
         _emp_name_val = _roe_profile.get("employee_name", selected)
-        _emp_addr = _roe_profile.get("employee_address", [])
+        _emp_addr = _roe_profile.get("employee_address") or []
         _emp_addr_str = ", ".join(a for a in _emp_addr if a)
 
         _ee_c1, _ee_c2 = st.columns(2)
@@ -4758,8 +4759,8 @@ with tab_insights:
         st.info("Select an employee to view insights.")
     else:
         _ins_profile = load_profile(selected)
-        _ins_wh = _ins_profile.get("wage_history", [])
-        _ins_rate = _ins_wh[-1]["rate"] if _ins_wh else 0
+        _ins_wh = _ins_profile.get("wage_history") or []
+        _ins_rate = (_ins_wh[-1] or {}).get("rate", 0) if _ins_wh else 0
         _ins_sched = _ins_profile.get("schedule_type", DEFAULT_SCHEDULE_TYPE)
         _ins_sched_info = get_schedule(_ins_sched)
         _ins_dpw = _ins_sched_info.get("days_per_week", 5)
