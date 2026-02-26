@@ -18,3 +18,8 @@ employer_config.json
 # Supabase local dev
 supabase/.temp/
 supabase/config.toml
+
+# Dev tooling — not for deployment
+.claude/
+portal/
+Launch Schedule Guide.bat
