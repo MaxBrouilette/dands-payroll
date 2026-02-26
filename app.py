@@ -803,28 +803,28 @@ if selected != "+ New Employee":
                                 key=f"di_{_sp}")
 
 st.sidebar.markdown("---")
-st.sidebar.caption(_co["operating_as"])
+st.sidebar.caption(_co.get("operating_as", ""))
 
 with st.sidebar.expander("Employer Profile"):
-    _co_legal = st.text_input("Legal Name", value=_co["legal_name"],
+    _co_legal = st.text_input("Legal Name", value=_co.get("legal_name", ""),
                               key="_co_legal")
-    _co_oa = st.text_input("Operating As", value=_co["operating_as"],
+    _co_oa = st.text_input("Operating As", value=_co.get("operating_as", ""),
                            key="_co_oa")
     _co_addr1 = st.text_input("Address Line 1",
-                              value=_co["address_lines"][0] if _co["address_lines"] else "",
+                              value=_co.get("address_lines", [""])[0] if _co.get("address_lines") else "",
                               key="_co_addr1")
     _co_addr2 = st.text_input("City, Province",
-                              value=_co["address_lines"][1] if len(_co["address_lines"]) > 1 else "",
+                              value=_co.get("address_lines", [])[1] if len(_co.get("address_lines", [])) > 1 else "",
                               key="_co_addr2")
     _co_addr3 = st.text_input("Postal Code",
-                              value=_co["address_lines"][2] if len(_co["address_lines"]) > 2 else "",
+                              value=_co.get("address_lines", [])[2] if len(_co.get("address_lines", [])) > 2 else "",
                               key="_co_addr3")
     _co_bn = st.text_input("CRA Business Number",
-                           value=_co["cra_bn"], key="_co_bn")
+                           value=_co.get("cra_bn", ""), key="_co_bn")
     _co_signer = st.text_input("Authorized Signer",
-                               value=_co["signer_name"], key="_co_signer")
+                               value=_co.get("signer_name", ""), key="_co_signer")
     _co_title = st.text_input("Signer Title",
-                              value=_co["signer_title"], key="_co_title")
+                              value=_co.get("signer_title", ""), key="_co_title")
     _co_email = st.text_input("Contact Email",
                               value=_co.get("signer_email", ""), key="_co_email")
     _co_wcb = st.number_input("WCB Rate (per $100)",
@@ -914,7 +914,7 @@ with tab_payroll:
     # ── Left: Employee Info ──
     with col1:
         st.subheader("Employee Info")
-        employer_name = _co["legal_name"]
+        employer_name = _co.get("legal_name", "Hot Plates Inc.")
         st.caption(f"Employer: **{employer_name}**")
 
         # Employment status badge
@@ -2384,7 +2384,7 @@ with tab_payroll:
     # Build paystub data dict (shared by preview + generate)
     _paystub_data = {
         "employer_name":    employer_name,
-        "company_address":  _co["address_lines"],
+        "company_address":  _co.get("address_lines", []),
         "employee_name":    employee_name.strip(),
         "employee_id":      employee_id,
         "employee_address": [addr1, addr2, addr3],
