@@ -607,7 +607,7 @@ if selected != st.session_state.loaded_employee:
         st.session_state.pop(_stale_key, None)
     if selected != "+ New Employee":
         p = load_profile(selected)
-        addr = p.get("employee_address", ["", "Edmonton, AB", ""])
+        addr = p.get("employee_address") or ["", "Edmonton, AB", ""]
         st.session_state["f_emp_name"]   = p.get("employee_name", selected)
         st.session_state["f_emp_id"]     = p.get("employee_id", "N/A")
         st.session_state["f_addr1"]      = addr[0] if len(addr) > 0 else ""
@@ -658,7 +658,7 @@ if selected != st.session_state.loaded_employee:
         st.session_state["f_ei"]         = 0.0
         st.session_state["f_fed_tax"]    = 0.0
         st.session_state["f_prov_tax"]   = 0.0
-        _pt = p.get("part_time", {})
+        _pt = p.get("part_time") or {}
         _freq_rev = {24: "Semi-Monthly (24/yr)", 26: "Bi-Weekly (26/yr)",
                      52: "Weekly (52/yr)"}
         st.session_state["f_pt_days_pw"]  = int(_pt.get("days_per_week", 3))
